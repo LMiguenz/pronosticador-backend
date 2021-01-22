@@ -9,6 +9,6 @@ let urlDB
 if(process.env.NODE_ENV === 'dev')
     urlDB = 'mongodb://localhost:27017/pronosticador'
 else
-    urlDB = 'mongodb+srv://Granjero:kszpgJv1iqqZsPHY@cluster0.mvvo0.mongodb.net/test'
+    urlDB = 'mongodb+srv://Granjero:kszpgJv1iqqZsPHY@cluster0.mvvo0.mongodb.net/Pronosticador'
 
 process.env.DB_URL = urlDB
