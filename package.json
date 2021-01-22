@@ -4,6 +4,7 @@
   "description": "Backend con servicios de pronóstico del tiempo en diferentes ciudades y abm de usuarios",
   "main": "server.js",
   "scripts": {
+    "start": "node server/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Leandro Miguenz",
