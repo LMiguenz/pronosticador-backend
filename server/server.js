@@ -8,8 +8,8 @@ const mongoose = require('mongoose')
 app.use(bodyParser.urlencoded({ extended: false }))
 // parse application/json
 app.use(bodyParser.json())
- 
-app.use( require('./routes/usuario') )
+//Configuración de rutas
+app.use( require('./routes/index') )
 
 mongoose.connect(process.env.DB_URL, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(res => console.log('Base de datos conectada'))
