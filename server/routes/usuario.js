@@ -34,8 +34,28 @@ function saveUserToDB(requestBody, encryptedPassword, res){
     })
 }
 
-app.get('/usuario', function (req, res) {
-    res.json('GET usuario')
+app.get('/usuarios', function (req, res) {
+
+    const offset = Number(req.query.offset || 0)
+    const limit = Number(req.query.limit || 0)
+
+    let filterPredicate = { isActive: true }
+
+    User.find(filterPredicate)
+    .skip(offset)
+    .limit(limit)
+    .exec()
+    .catch( err => { res.status(400).json({err}) })
+    .then( users => {
+        User.countDocuments(filterPredicate)
+        .then( count => {
+            res.json({
+                count,
+                users
+            })
+        })
+
+    })
 })
 
 app.put('/usuario/:id', function (req, res) {
