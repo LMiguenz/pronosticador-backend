@@ -3,7 +3,9 @@ const bcrypt = require('bcrypt')
 const _ = require('underscore')
 
 const User = require('../models/usuario')
-  
+
+const {verifyToken, verifyAdminRole} = require('../middleware/auth')
+
 const app = express()
 
 
@@ -34,7 +36,7 @@ function saveUserToDB(requestBody, encryptedPassword, res){
     })
 }
 
-app.get('/usuarios', function (req, res) {
+app.get('/usuarios', [verifyToken, verifyAdminRole], function (req, res) {
 
     const offset = Number(req.query.offset || 0)
     const limit = Number(req.query.limit || 0)
@@ -58,7 +60,7 @@ app.get('/usuarios', function (req, res) {
     })
 })
 
-app.put('/usuario/:id', function (req, res) {
+app.put('/usuario/:id', verifyToken, function (req, res) {
     let id = req.params.id
     let body = _.pick(req.body, ['name', 'email', 'role', 'isActive'])
 
@@ -76,8 +78,20 @@ app.put('/usuario/:id', function (req, res) {
 })
 
   
-app.delete('/usuario', function (req, res) {
-    res.json('DELETE usuario')
+app.delete('/usuario/:id', verifyToken, function (req, res) {
+    let id = req.params.id
+
+    User.findByIdAndUpdate(id, { isActive: false }, {new: true, runValidators: true}, (err, dbUser) => {
+        if(err){
+            return res.status(400).json({
+                err
+            })
+        }
+
+        res.status(200).json({
+            user: dbUser
+        })
+    })
 })
 
 

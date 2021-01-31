@@ -35,8 +35,11 @@ app.post('/login', function (req, res) {
         }
 
         const token = jwt.sign({
-            user: userDb
-        }, process.env.TOKEN_SECRET, {expiresIn: process.env.TOKEN_EXPIRATION})
+                user: userDb
+            }, 
+            process.env.TOKEN_SECRET, 
+            {expiresIn: process.env.TOKEN_EXPIRATION}
+        )
 
         res.json({
             user: userDb,
