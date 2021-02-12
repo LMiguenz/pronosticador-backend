@@ -64,7 +64,7 @@ app.put('/usuario/:id', verifyToken, function (req, res) {
     let id = req.params.id
     let body = _.pick(req.body, ['name', 'email', 'role', 'isActive'])
 
-    User.findByIdAndUpdate(id, body, {new: true, runValidators: true}, (err, dbUser) => {
+    User.findByIdAndUpdate(id, body, {new: true, runValidators: true, context: 'query'}, (err, dbUser) => {
         if(err){
             return res.status(400).json({
                 err
