@@ -42,6 +42,9 @@ userSchema.methods.toJSON = function() {
     let userObject = user.toObject()
     delete userObject.password
 
+    userObject.uid = userObject._id
+    delete userObject._id
+
     return userObject
 }
 
