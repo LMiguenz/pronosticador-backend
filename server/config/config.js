@@ -11,6 +11,8 @@ process.env.TOKEN_EXPIRATION = 60 * 60 * 24 * 30
 //Secret para el token
 process.env.TOKEN_SECRET = process.env.TOKEN_SECRET || 'development-secret'
 
+//API key de OpenWeather
+process.env.WEATHER_API_KEY = process.env.WEATHER_API_KEY || 'e3de8159b125ee1ec0e73a9be7bb22b2'
 
 //Base de datos
 let urlDB
