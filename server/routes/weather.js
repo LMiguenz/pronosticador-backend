@@ -2,6 +2,9 @@ const express = require('express')
 const axios = require('axios').default
 const {verifyToken, _} = require('../middleware/auth')
 
+const User = require('../models/usuario')
+const Favourite = require('../models/favourite')
+
 const app = express()
 const openWeatherBaseUrl = "https://api.openweathermap.org/data/2.5"
 
@@ -39,5 +42,25 @@ async function getCurrentWeatherFor(cityQuery){
     }
 }
     
+
+app.put('/favoritos', verifyToken, (req, res) => {
+    addToFavourites(req, res)
+})
+
+async function addToFavourites(req, res){
+    const fav = new Favourite()
+    fav.queryString = req.query.q
+    const savedFav = await fav.save()
+    if(savedFav === fav){
+        const userFromDB = await User.findById(req.user.uid)
+        if(userFromDB){
+            userFromDB.favourites.push(fav)
+            userFromDB.save()
+            res.status(200).send("Favorito agregado!")
+        }
+    }else{
+        res.status(500).send("Error: " + savedFav.error)
+    }
+}
 
 module.exports = app;

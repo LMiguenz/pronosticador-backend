@@ -22,6 +22,9 @@ let userSchema = new Schema({
         type: String,
         required: [true, "La contraseña es obligatoria"]
     },
+    favourites: [{ 
+        type: Schema.Types.ObjectId, ref: 'Favourite'
+    }],
     isGoogleUser: {
         type: Boolean,
         default: false
