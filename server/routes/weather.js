@@ -8,6 +8,7 @@ const Favourite = require('../models/favourite')
 const router = express()
 const openWeatherBaseUrl = "https://api.openweathermap.org/data/2.5"
 
+
 router.get('/clima', verifyToken, function (req, res) {
     getCurrentWeatherFor(req.query.query)
         .catch( error => { 
@@ -45,17 +46,17 @@ async function getCurrentWeatherFor(cityQuery){
     
 
 router.post('/favoritos', verifyToken, (req, res) => {
-    addToFavourites(req, res)
+    addToFavourites(req.user.uid, req.query.q, res)
 })
 
-async function addToFavourites(req, res){
+async function addToFavourites(userId, query, res){
     const fav = new Favourite()
-    fav.queryString = req.query.q
-    fav.userId = req.user.uid
+    fav.queryString = query
+    fav.userId = userId
 
     try{
         await fav.save()
-        const userFromDB = await User.findById(req.user.uid)
+        const userFromDB = await User.findById(userId)
         if(userFromDB){
             userFromDB.favourites.push(fav)
             userFromDB.save()
@@ -69,22 +70,22 @@ async function addToFavourites(req, res){
 
 router.get('/favoritos', verifyToken, (req, res) => {
 
-    queryAllUserFavourites(req)
+    queryAllUserFavourites(req.user.uid)
         .then(result => { res.status(200).json(result) })
         .catch(error => { res.status(error.status).send(error) })
 })
 
-async function queryAllUserFavourites(req){
+async function queryAllUserFavourites(userId){
     try{
-        const user = await User.findById(req.user.uid).populate('favourites').exec()
+        const user = await User.findById(userId).populate('favourites').exec()
         
         const requestPromises = user.favourites.map(fav => 
             getCurrentWeatherFor(fav.queryString).catch(e => e.message)
         )
         const results = await Promise.all(requestPromises)
 
-        let formattedResult = []
         //Le doy formato a la respuesta
+        let formattedResult = []
         for(i = 0; i < user.favourites.length; i++){
             formattedResult.push(
                 {

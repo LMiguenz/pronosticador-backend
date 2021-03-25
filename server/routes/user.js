@@ -44,42 +44,31 @@ router.get('/usuarios', [verifyToken, verifyAdminRole], function (req, res) {
     let filterPredicate = { isActive: true }
 
     User.find(filterPredicate)
-    .skip(offset)
-    .limit(limit)
-    .exec()
-    .catch( err => { res.status(400).json({err}) })
-    .then( users => {
-        User.countDocuments(filterPredicate)
-        .then( count => {
-            res.json({
-                count,
-                users
-            })
+        .skip(offset)
+        .limit(limit)
+        .exec()
+        .catch( err => { res.status(400).json({err}) })
+        .then( users => {
+            User.countDocuments(filterPredicate)
+                .then( count => {
+                    res.json({
+                        count,
+                        users
+                    })
+                })
         })
-
-    })
 })
 
 router.put('/usuario', verifyToken, function (req, res) {
     let id = req.user.uid
     let body = _.pick(req.body, ['name', 'email', 'role', 'isActive'])
 
-    User.findByIdAndUpdate(id, body, 
-        {
-            new: true, 
-            runValidators: true, 
-            context: 'query'
-        }, 
+    User.findByIdAndUpdate(id, body, {new: true, runValidators: true, context: 'query'}, 
         (err, dbUser) => {
-            if(err){
-                return res.status(400).json({
-                    err
-                })
-            }
-
-        res.status(200).json({
-            user: dbUser
-        })
+            if(err)
+                return res.status(400).json({ err })
+            else
+                res.status(200).json({ user: dbUser })
     })
 })
 
@@ -87,17 +76,13 @@ router.put('/usuario', verifyToken, function (req, res) {
 router.delete('/usuario/:id', [verifyToken, verifyAdminRole], function (req, res) {
     let id = req.params.id
 
-    User.findByIdAndUpdate(id, { isActive: false }, {new: true, runValidators: true}, (err, dbUser) => {
-        if(err){
-            return res.status(400).json({
-                err
-            })
-        }
-
-        res.status(200).json({
-            user: dbUser
+    User.findByIdAndUpdate(id, { isActive: false }, {new: true, runValidators: true}, 
+        (err, dbUser) => {
+            if(err)
+                return res.status(400).json({ err })
+            else
+                res.status(200).json({ user: dbUser })
         })
-    })
 })
 
 

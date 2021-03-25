@@ -11,19 +11,11 @@ router.post('/login', function (req, res) {
     let body = req.body
 
     User.findOne({email: body.email}, (err, userDb) => {
-        if(err){
-            return res.status(500).json({
-                err
-            })
-        }
-
-        if( !userDb ){
-            return res.status(400).json({
-                err: {
-                    message: "Credenciales incorrectas"
-                }
-            })
-        }
+        if(err)
+            return res.status(500).json({ err })
+        
+        if( !userDb )
+            return res.status(400).json({ err: { message: "Credenciales incorrectas" } })
 
         const isPasswordOk = bcrypt.compareSync(body.password, userDb.password)
         if( !isPasswordOk ){
@@ -41,7 +33,7 @@ router.post('/login', function (req, res) {
             {expiresIn: process.env.TOKEN_EXPIRATION}
         )
 
-        res.json({
+        res.status(200).json({
             user: userDb,
             token
         })
