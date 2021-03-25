@@ -50,16 +50,18 @@ app.put('/favoritos', verifyToken, (req, res) => {
 async function addToFavourites(req, res){
     const fav = new Favourite()
     fav.queryString = req.query.q
-    const savedFav = await fav.save()
-    if(savedFav === fav){
+    fav.userId = req.user.uid
+
+    try{
+        await fav.save()
         const userFromDB = await User.findById(req.user.uid)
         if(userFromDB){
             userFromDB.favourites.push(fav)
             userFromDB.save()
-            res.status(200).send("Favorito agregado!")
+            res.status(200).send(`La búsqueda ${fav.queryString} se agregó a tu lista de favoritos`)
         }
-    }else{
-        res.status(500).send("Error: " + savedFav.error)
+    }catch(error){
+        res.status(500).send(`Error: ¡la búsqueda ${fav.queryString} ya estaba en tu lista de favoritos!`)
     }
 }
 
