@@ -1,12 +1,12 @@
 const express = require('express')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
-const User = require('../models/usuario')
+const User = require('../models/user')
   
-const app = express()
+const router = express()
 
 
-app.post('/login', function (req, res) {
+router.post('/login', function (req, res) {
 
     let body = req.body
 
@@ -48,4 +48,4 @@ app.post('/login', function (req, res) {
     })
 })
 
-module.exports = app
+module.exports = router

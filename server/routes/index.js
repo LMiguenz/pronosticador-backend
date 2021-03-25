@@ -1,8 +1,8 @@
 const express = require('express')
-const app = express()
+const router = express()
 
-app.use( require('./usuario') )
-app.use( require('./login') )
-app.use( require('./weather') )
+router.use( require('./user') )
+router.use( require('./login') )
+router.use( require('./weather') )
 
-module.exports = app
+module.exports = router

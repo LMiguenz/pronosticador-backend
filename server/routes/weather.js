@@ -2,13 +2,13 @@ const express = require('express')
 const axios = require('axios').default
 const {verifyToken, _} = require('../middleware/auth')
 
-const User = require('../models/usuario')
+const User = require('../models/user')
 const Favourite = require('../models/favourite')
 
-const app = express()
+const router = express()
 const openWeatherBaseUrl = "https://api.openweathermap.org/data/2.5"
 
-app.get('/clima', verifyToken, function (req, res) {
+router.get('/clima', verifyToken, function (req, res) {
     getCurrentWeatherFor(req.query.query)
         .catch( error => { 
             res.status(error.status).send(error.message) 
@@ -44,7 +44,7 @@ async function getCurrentWeatherFor(cityQuery){
 }
     
 
-app.post('/favoritos', verifyToken, (req, res) => {
+router.post('/favoritos', verifyToken, (req, res) => {
     addToFavourites(req, res)
 })
 
@@ -67,7 +67,7 @@ async function addToFavourites(req, res){
 }
 
 
-app.get('/favoritos', verifyToken, (req, res) => {
+router.get('/favoritos', verifyToken, (req, res) => {
 
     queryAllUserFavourites(req)
         .then(result => { res.status(200).json(result) })
@@ -100,4 +100,4 @@ async function queryAllUserFavourites(req){
     }
 }
 
-module.exports = app;
+module.exports = router;

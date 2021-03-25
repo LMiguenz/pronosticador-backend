@@ -2,14 +2,14 @@ const express = require('express')
 const bcrypt = require('bcrypt')
 const _ = require('underscore')
 
-const User = require('../models/usuario')
+const User = require('../models/user')
 
 const {verifyToken, verifyAdminRole} = require('../middleware/auth')
 
-const app = express()
+const router = express()
 
 
-app.post('/usuario', function (req, res) {
+router.post('/usuario', function (req, res) {
     bcrypt.hash(req.body.password, 10)
         .catch( err => console.log("Password encryption error: ", err))
         .then( hash => saveUserToDB(req.body, hash, res))
@@ -36,7 +36,7 @@ function saveUserToDB(requestBody, encryptedPassword, res){
     })
 }
 
-app.get('/usuarios', [verifyToken, verifyAdminRole], function (req, res) {
+router.get('/usuarios', [verifyToken, verifyAdminRole], function (req, res) {
 
     const offset = Number(req.query.offset || 0)
     const limit = Number(req.query.limit || 0)
@@ -60,7 +60,7 @@ app.get('/usuarios', [verifyToken, verifyAdminRole], function (req, res) {
     })
 })
 
-app.put('/usuario', verifyToken, function (req, res) {
+router.put('/usuario', verifyToken, function (req, res) {
     let id = req.user.uid
     let body = _.pick(req.body, ['name', 'email', 'role', 'isActive'])
 
@@ -84,7 +84,7 @@ app.put('/usuario', verifyToken, function (req, res) {
 })
 
   
-app.delete('/usuario/:id', [verifyToken, verifyAdminRole], function (req, res) {
+router.delete('/usuario/:id', [verifyToken, verifyAdminRole], function (req, res) {
     let id = req.params.id
 
     User.findByIdAndUpdate(id, { isActive: false }, {new: true, runValidators: true}, (err, dbUser) => {
@@ -101,4 +101,4 @@ app.delete('/usuario/:id', [verifyToken, verifyAdminRole], function (req, res) {
 })
 
 
-module.exports = app;
+module.exports = router;
