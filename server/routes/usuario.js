@@ -60,8 +60,8 @@ app.get('/usuarios', [verifyToken, verifyAdminRole], function (req, res) {
     })
 })
 
-app.put('/usuario/:id', verifyToken, function (req, res) {
-    let id = req.params.id
+app.put('/usuario', verifyToken, function (req, res) {
+    let id = req.user.uid
     let body = _.pick(req.body, ['name', 'email', 'role', 'isActive'])
 
     User.findByIdAndUpdate(id, body, 
@@ -84,7 +84,7 @@ app.put('/usuario/:id', verifyToken, function (req, res) {
 })
 
   
-app.delete('/usuario/:id', verifyToken, function (req, res) {
+app.delete('/usuario/:id', [verifyToken, verifyAdminRole], function (req, res) {
     let id = req.params.id
 
     User.findByIdAndUpdate(id, { isActive: false }, {new: true, runValidators: true}, (err, dbUser) => {
