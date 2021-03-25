@@ -19,7 +19,7 @@ app.get('/clima', verifyToken, function (req, res) {
 
 async function getCurrentWeatherFor(cityQuery){
     try{
-        const result = await axios.get(`${openWeatherBaseUrl}/weather?q=${cityQuery}&appid=${process.env.WEATHER_API_KEY}`)
+        const result = await axios.get(`${openWeatherBaseUrl}/weather?q=${cityQuery}&appid=${process.env.WEATHER_API_KEY}&units=metric&lang=es`)
         console.log(result)
         return await result.data
     }catch(error){
@@ -29,14 +29,15 @@ async function getCurrentWeatherFor(cityQuery){
             error.status = 404
             throw error
         }else{
+            let returnError
             if(error.response.data != undefined){                
-                let returnError = new Error(error.response.data.message)
+                returnError = new Error(error.response.data.message)
                 returnError.status = error.response.data.cod
-                throw returnError
             }else{
-                let returnError = new Error("Ha ocurrido un error desconocido")
+                returnError = new Error("Ha ocurrido un error desconocido")
                 returnError.status = 500
             }
+            throw returnError
         }
             
     }
@@ -66,8 +67,37 @@ async function addToFavourites(req, res){
 }
 
 
-// app.get('/favoritos', verifyToken, (req, res) => {
-    
-// })
+app.get('/favoritos', verifyToken, (req, res) => {
+
+    queryAllUserFavourites(req)
+        .then(result => { res.status(200).json(result) })
+        .catch(error => { res.status(error.status).send(error) })
+})
+
+async function queryAllUserFavourites(req){
+    try{
+        const user = await User.findById(req.user.uid).populate('favourites').exec()
+        
+        const requestPromises = user.favourites.map(fav => 
+            getCurrentWeatherFor(fav.queryString).catch(e => e.message)
+        )
+        const results = await Promise.all(requestPromises)
+
+        let formattedResult = []
+        //Le doy formato a la respuesta
+        for(i = 0; i < user.favourites.length; i++){
+            formattedResult.push(
+                {
+                    query: user.favourites[i].queryString,
+                    result: results[i]
+                }
+            )
+        }
+
+        return formattedResult
+    }catch(error){
+        throw new Error(error)
+    }
+}
 
 module.exports = app;
