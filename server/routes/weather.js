@@ -43,7 +43,7 @@ async function getCurrentWeatherFor(cityQuery){
 }
     
 
-app.put('/favoritos', verifyToken, (req, res) => {
+app.post('/favoritos', verifyToken, (req, res) => {
     addToFavourites(req, res)
 })
 
@@ -64,5 +64,10 @@ async function addToFavourites(req, res){
         res.status(500).send(`Error: ¡la búsqueda ${fav.queryString} ya estaba en tu lista de favoritos!`)
     }
 }
+
+
+// app.get('/favoritos', verifyToken, (req, res) => {
+    
+// })
 
 module.exports = app;
