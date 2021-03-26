@@ -11,11 +11,8 @@ const openWeatherBaseUrl = "https://api.openweathermap.org/data/2.5"
 
 router.get('/clima', verifyToken, function (req, res) {
     getCurrentWeatherFor(req.query.query)
-        .catch( error => { 
-            res.status(error.status).send(error.message) 
-        })
         .then( result => { res.status(200).send(result) })
-        
+        .catch( error => { res.status(error.status).send(error.message) })
 })
 
 async function getCurrentWeatherFor(cityQuery){
@@ -46,10 +43,12 @@ async function getCurrentWeatherFor(cityQuery){
     
 
 router.post('/favoritos', verifyToken, (req, res) => {
-    addToFavourites(req.user.uid, req.query.q, res)
+    addToFavourites(req.user.uid, req.query.q)
+        .then( result => { res.status(200).send(result.message) })
+        .catch( error => { res.status(error.status).send(error.message) })
 })
 
-async function addToFavourites(userId, query, res){
+async function addToFavourites(userId, query){
     const fav = new Favourite()
     fav.queryString = query
     fav.userId = userId
@@ -60,16 +59,17 @@ async function addToFavourites(userId, query, res){
         if(userFromDB){
             userFromDB.favourites.push(fav)
             userFromDB.save()
-            res.status(200).send(`La búsqueda ${fav.queryString} se agregó a tu lista de favoritos`)
+            return { message: `La búsqueda ${fav.queryString} se agregó a tu lista de favoritos` }
         }
     }catch(error){
-        res.status(500).send(`Error: ¡la búsqueda ${fav.queryString} ya estaba en tu lista de favoritos!`)
+        let returnError = new Error(`Error: ¡la búsqueda ${fav.queryString} ya estaba en tu lista de favoritos!`)
+        returnError.status = 409
+        throw returnError
     }
 }
 
 
 router.get('/favoritos', verifyToken, (req, res) => {
-
     queryAllUserFavourites(req.user.uid)
         .then(result => { res.status(200).json(result) })
         .catch(error => { res.status(error.status).send(error) })
