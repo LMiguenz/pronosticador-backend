@@ -7,37 +7,42 @@ const router = express()
 
 
 router.post('/login', function (req, res) {
-
-    let body = req.body
-
-    User.findOne({email: body.email}, (err, userDb) => {
-        if(err)
-            return res.status(500).json({ err })
-        
-        if( !userDb )
-            return res.status(400).json({ err: { message: "Credenciales incorrectas" } })
-
-        const isPasswordOk = bcrypt.compareSync(body.password, userDb.password)
-        if( !isPasswordOk ){
-            return res.status(400).json({
-                err: {
-                    message: "Credenciales incorrectas"
-                }
-            })
-        }
-
-        const token = jwt.sign({
-                user: userDb
-            }, 
-            process.env.TOKEN_SECRET, 
-            {expiresIn: process.env.TOKEN_EXPIRATION}
-        )
-
-        res.status(200).json({
-            user: userDb,
-            token
-        })
-    })
+    authUser(req.body.email, req.body.password)
+        .then( result => res.status(200).json(result) )
+        .catch( error => res.status(error.status).send(error.message) )
 })
+
+
+async function authUser(email, password){
+    try{
+        const dbUser = await User.findOne({email})
+        if( !dbUser ){
+            throw getWrongCredentialsError()
+        }else{
+            const isPasswordOk = await bcrypt.compare(password, dbUser.password)
+            if( !isPasswordOk )
+                throw getWrongCredentialsError()
+            else{
+                const token = jwt.sign(
+                    {user: dbUser}, 
+                    process.env.TOKEN_SECRET, 
+                    {expiresIn: process.env.TOKEN_EXPIRATION}
+                )
+                return {user: dbUser, token}
+            }
+        }
+    }catch(error){
+        let returnError = new Error(error.message)
+        returnError.status = 500
+        throw returnError
+    }
+}
+
+function getWrongCredentialsError(){
+    let wrongCredentialsError = new Error("Credenciales incorrectas")
+    wrongCredentialsError.status = 400
+    return wrongCredentialsError
+}
+
 
 module.exports = router
