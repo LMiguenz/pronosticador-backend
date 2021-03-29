@@ -11,7 +11,14 @@ router.use(express.json())
 //Configuración de rutas
 router.use( require('./routes/index') )
 
-mongoose.connect(process.env.DB_URL, { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true })
+mongoose.connect(process.env.DB_URL,
+        { 
+            useNewUrlParser: true, 
+            useUnifiedTopology: true, 
+            useCreateIndex: true, 
+            useFindAndModify: false 
+        }
+    )
     .then(res => console.log('Base de datos conectada'))
     .catch(error => console.log('Error al conectar con la BD: ', error))
     
